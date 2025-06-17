@@ -66,6 +66,7 @@ jobs:
 
       - name: Build Docker model
         run: |
+          export MLFLOW_TRACKING_URI=file:./mlruns
           mlflow models build-docker \
             --model-uri "runs:/$RUN_ID/model" \
             --name "heart_disease"
