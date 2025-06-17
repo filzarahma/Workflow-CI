@@ -1,0 +1,110 @@
+name: CI for Modelling Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CSV_URL: "MLproject/heart_preprocessing.csv"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Set up Python version
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11.13'
+
+    # Check Dataset URL
+    - name: Display CSV URL
+      run: echo "CSV_URL=${CSV_URL}"
+
+    # Install dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mlflow pandas scikit-learn
+
+    # Running MLflow project
+    - name: Run MLflow project
+      run: |
+        mlflow run MLproject --env-manager=local
+
+    # Get the latest MLflow run_id
+    - name: Get latest MLflow run_id
+      id: get_run_id
+      env:
+        MLFLOW_TRACKING_URI: "file://$(pwd)/mlruns"
+        EXPERIMENT_NAME: "heart-disease-classification"
+      run: |
+        echo "Getting latest MLflow run_id..."
+        python - <<EOF >> $GITHUB_OUTPUT
+        import mlflow
+        import os
+
+        mlflow.set_tracking_uri("${MLFLOW_TRACKING_URI}")
+        exp = mlflow.get_experiment_by_name("${EXPERIMENT_NAME}")
+        run_id = ""
+        if exp:
+            runs = mlflow.search_runs([exp.experiment_id], order_by=["start_time DESC"])
+            if not runs.empty:
+                run_id = runs.iloc[0]["run_id"]
+        print(f"run_id={run_id}")
+        EOF
+
+    # Show the latest run_id
+    - name: Show MLflow run_id
+      run: echo "Latest run_id is ${{ steps.get_run_id.outputs.run_id }}"
+
+    # Set up Git LFS
+    - name: Set up Git LFS
+      run: |
+        git config --global user.name "${{ secrets.USERNAME }}"
+        git config --global user.email "${{ secrets.EMAIL }}"
+        git lfs install
+        git lfs track "mlruns/**"
+        git add .gitattributes
+        git commit -m "Track large files in mlruns with Git LFS" || true
+        git push origin main
+
+    # Save mlruns directory to GitHub
+    - name: Save mlruns directory to GitHub
+      run: |
+        git config --global user.name "${{ secrets.USERNAME }}"
+        git config --global user.email "${{ secrets.EMAIL }}"
+        git add mlruns/
+        git commit -m "Save MLflow runs" || true
+        git push origin main
+
+    # Build Docker image
+    - name: Build Docker model
+      run: |
+        mlflow models build-docker \
+          --model-uri ./mlruns/0/${{ steps.get_run_id.outputs.run_id }}/artifacts/model \
+          --name heart_disease
+
+    # Log in to Docker Hub
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Tag Docker image
+    - name: Tag Docker Image
+      run: |
+        docker tag heart_disease ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-model:latest
+
+    # Push Docker image to Docker Hub
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-model:latest
