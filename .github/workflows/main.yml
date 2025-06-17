@@ -32,6 +32,7 @@ jobs:
 
     - name: Run MLflow project
       run: |
+        export MLFLOW_TRACKING_URI=file:./mlruns
         mlflow run MLproject --env-manager=local
 
     - name: Set up Git LFS
