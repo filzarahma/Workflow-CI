@@ -4,11 +4,12 @@ import mlflow
 import mlflow.sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+import numpy as np
+import warnings
 
 def main(n_estimators=400, max_depth=10, dataset="heart_preprocessing.csv"):
-    # Inisiasi tracking URI dan eksperimen MLflow
-    mlflow.set_tracking_uri("http://127.0.0.1:5000/")
-    mlflow.set_experiment("heart-disease-classification")
+    warnings.filterwarnings("ignore")
+    np.random.seed(40)
 
     # Membaca data yang sudah diproses
     df = pd.read_csv(dataset)
