@@ -7,12 +7,13 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import warnings
 
-def main(n_estimators=400, max_depth=10, dataset="heart_preprocessing.csv"):
+if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
 
     # Membaca data yang sudah diproses
-    df = pd.read_csv(dataset)
+    file_path = sys.argv[3] if len(sys.argv) > 3 else "heart_preprocessing.csv"
+    df = pd.read_csv(file_path)
     X = df.drop(columns=["HeartDisease"])
     y = df["HeartDisease"]
 
@@ -21,16 +22,12 @@ def main(n_estimators=400, max_depth=10, dataset="heart_preprocessing.csv"):
 
     input_example = X_train.sample(5, random_state=42)
 
+    n_estimators = int(sys.argv[1]) if len(sys.argv) > 1 else 400
+    max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+
     with mlflow.start_run():
-        mlflow.log_param("n_estimators", n_estimators)
-        mlflow.log_param("max_depth", max_depth)
-        mlflow.log_param("random_state", 42)
-
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
         model.fit(X_train, y_train)
-
-        accuracy = model.score(X_test, y_test)
-        mlflow.log_metric("accuracy", accuracy)
 
         mlflow.sklearn.log_model(
             sk_model=model,
@@ -38,9 +35,5 @@ def main(n_estimators=400, max_depth=10, dataset="heart_preprocessing.csv"):
             input_example=input_example
         )
 
-if __name__ == "__main__":
-    # Usage: python modelling.py <n_estimators> <max_depth> <dataset>
-    n_estimators = int(sys.argv[1]) if len(sys.argv) > 1 else 400
-    max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
-    dataset = sys.argv[3] if len(sys.argv) > 3 else "heart_preprocessing.csv"
-    main(n_estimators, max_depth, dataset)
+        accuracy = model.score(X_test, y_test)
+        mlflow.log_metric("accuracy", accuracy)
