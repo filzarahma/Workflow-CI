@@ -1,5 +1,5 @@
 name: CI for Modelling Workflow
- 
+
 on:
   push:
     branches: [main]
