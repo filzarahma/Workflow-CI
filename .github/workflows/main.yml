@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11.13'
 
       - name: Install dependencies
         run: |
@@ -31,12 +31,19 @@ jobs:
         run: |
           mlflow run . --env-manager=local
 
-      - name: Get latest MLflow run_id from directory
-        id: get_run_id
+      # - name: Get latest MLflow run_id from directory
+      #   id: get_run_id
+      #   run: |
+      #     RUN_ID=$(ls -t mlruns/0 | head -n 1)
+      #     echo "Found latest run_id: $RUN_ID"
+      #     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+      # Get latest run_id
+      - name: Get latest MLflow run_id
         run: |
-          RUN_ID=$(ls -t mlruns/0 | head -n 1)
-          echo "Found latest run_id: $RUN_ID"
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Latest run_id: $RUN_ID"
 
       - name: Show latest MLflow run_id
         run: echo "Latest run_id is ${{ steps.get_run_id.outputs.run_id }}"
