@@ -34,6 +34,16 @@ jobs:
       run: |
         mlflow run MLproject --env-manager=local
 
+    - name: Get latest MLflow run_id from directory
+      id: get_run_id
+      run: |
+        RUN_ID=$(ls -t mlruns/0 | head -n 1)
+        echo "Found latest run_id: $RUN_ID"
+        echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+    - name: Show latest MLflow run_id
+      run: echo "Latest run_id is ${{ steps.get_run_id.outputs.run_id }}"
+
     - name: Set up Git LFS
       run: |
         git config --global user.name "${{ secrets.USERNAME }}"
