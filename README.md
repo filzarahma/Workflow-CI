@@ -67,8 +67,8 @@ The MLproject file defines the workflow for training the model. It includes:
 
 1. Clone this repository:
    ```
-   git clone <repository-url>
-   cd SMSML_Filza-Rahma-Muflihah/Workflow-CI
+   git clone https://github.com/filzarahma/Workflow-CI.git
+   cd Workflow-CI
    ```
 
 2. Run the MLflow project:
