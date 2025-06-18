@@ -100,8 +100,7 @@ The model is containerized and available on Docker Hub:
 To pull and run the Docker image:
 
 ```bash
-docker pull filzarahma/heart_disease
-docker run -p 8080:8080 filzarahma/heart_disease
+docker run --name heart-disease-hub -p 5005:8080 filzarahma/heart_disease:latest
 ```
 
 ## License
