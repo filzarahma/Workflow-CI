@@ -1,4 +1,4 @@
-name: CI for Modelling Workflow
+name: CI/CD for Modelling Workflow
 
 on:
   push:
@@ -8,35 +8,37 @@ on:
 
 env:
   CSV_URL: "MLproject/heart_preprocessing.csv"
+  TARGET_VAR: "HeartDisease"
 
 jobs:
   modelling:
     runs-on: ubuntu-latest
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Setup Python 3.12.7
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11.13'
+          python-version: "3.12.7"
 
+      # Check Env Variables
+      - name: Check Env
+        run: |
+          echo $CSV_URL
+
+      # Install mlflow
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mlflow
-
+          pip install mlflow  
+      
+      # Run as a mlflow project
       - name: Run MLflow Project
-        working-directory: MLproject
         run: |
-          mlflow run . --env-manager=local
-
-      # - name: Get latest MLflow run_id from directory
-      #   id: get_run_id
-      #   run: |
-      #     RUN_ID=$(ls -t mlruns/0 | head -n 1)
-      #     echo "Found latest run_id: $RUN_ID"
-      #     echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          mlflow run MLproject --env-manager=local
 
       # Get latest run_id
       - name: Get latest MLflow run_id
@@ -44,7 +46,33 @@ jobs:
           RUN_ID=$(ls -td mlruns/0/*/ | grep -v "models" | head -n 1 | awk -F'/' '{print $(NF-1)}')
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
+      
+      # Build Docker model
+      - name: Build Docker model
+        run: |
+          export MLFLOW_TRACKING_URI=file:./mlruns
+          mlflow models build-docker \
+            --model-uri "runs:/$RUN_ID/model" \
+            --name "heart_disease"
 
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Tag Docker Image
+      - name: Tag Docker Image
+        run: |
+          docker tag heart_disease ${{ secrets.DOCKERHUB_USERNAME }}/heart_disease:latest
+      
+      # Push Docker Image
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/heart_disease:latest
+
+      # Set up Git LFS
       - name: Set up Git LFS
         run: |
           git config --global user.name "${{ secrets.USERNAME }}"
@@ -54,35 +82,17 @@ jobs:
           git add .gitattributes
           git commit -m "Track large files in mlruns with Git LFS" || true
           git push origin main
-
+      
+      # Save mlruns directory to GitHub
       - name: Save mlruns directory to GitHub
         run: |
           git config --global user.name "${{ secrets.USERNAME }}"
           git config --global user.email "${{ secrets.EMAIL }}"
           git add mlruns/
           git commit -m "Save MLflow runs" || true
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} HEAD:main
+          git push origin main
 
 
-      - name: Build Docker model
-        run: |
-          export MLFLOW_TRACKING_URI=file:./mlruns
-          mlflow models build-docker \
-            --model-uri "runs:/$RUN_ID/model" \
-            --name "heart_disease"
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Tag Docker Image
-        run: |
-          docker tag heart_disease ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-model:latest
-
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/heart-disease-model:latest
+      
 
 
