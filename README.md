@@ -40,8 +40,9 @@ Dataset (`heart_preprocessing.csv`) berisi data pasien yang sudah diproses denga
 │   ├── MLproject           # Konfigurasi proyek MLflow
 │   ├── modelling.py        # Script pelatihan model
 │   └── heart_preprocessing.csv  # Dataset yang sudah diproses
+│   └──dockerhub.txt        # URL repositori Docker Hub
 ├── README.md               # File ini
-└── dockerhub.txt           # URL repositori Docker Hub
+└── MLruns                  # Output workflow github actions
 ```
 
 ## Proyek MLflow
