@@ -1,113 +1,113 @@
-# Heart Disease Prediction with CI/CD Workflow
+# Prediksi Penyakit Jantung dengan Workflow CI/CD
 
-This repository contains a machine learning workflow for heart disease prediction with continuous integration and deployment capabilities. The project uses MLflow for experiment tracking and model management, and GitHub Actions for CI/CD.
+Repositori ini berisi alur kerja machine learning untuk prediksi penyakit jantung dengan kemampuan continuous integration dan deployment. Proyek ini menggunakan MLflow untuk pelacakan eksperimen dan manajemen model, serta GitHub Actions untuk CI/CD.
 
-## Project Overview
+## Gambaran Proyek
 
-This project implements a RandomForest classifier to predict heart disease using patient health data. The workflow includes:
+Proyek ini mengimplementasikan classifier RandomForest untuk memprediksi penyakit jantung menggunakan data kesehatan pasien. Alur kerja meliputi:
 
-- Data preprocessing and feature engineering
-- Model training using RandomForestClassifier
-- Model evaluation and metrics tracking
-- Continuous integration with GitHub Actions
-- Containerization with Docker
+- Pra-pemrosesan data dan rekayasa fitur
+- Pelatihan model menggunakan RandomForestClassifier
+- Evaluasi model dan pelacakan metrik
+- Continuous integration dengan GitHub Actions
+- Containerisasi dengan Docker
 
 ## Dataset
 
-The dataset (`heart_preprocessing.csv`) contains preprocessed patient data with the following features:
-- Age
-- Sex
-- ChestPainType
-- RestingBP
-- Cholesterol
-- FastingBS
-- RestingECG
-- MaxHR
-- ExerciseAngina
+Dataset (`heart_preprocessing.csv`) berisi data pasien yang sudah diproses dengan fitur-fitur berikut:
+- Age (Usia)
+- Sex (Jenis Kelamin)
+- ChestPainType (Tipe Nyeri Dada)
+- RestingBP (Tekanan Darah Istirahat)
+- Cholesterol (Kolesterol)
+- FastingBS (Gula Darah Puasa)
+- RestingECG (ECG Istirahat)
+- MaxHR (Detak Jantung Maksimum)
+- ExerciseAngina (Angina akibat Olahraga)
 - Oldpeak
 - ST_Slope
-- HeartDisease (target variable)
+- HeartDisease (variabel target - Penyakit Jantung)
 
-## Project Structure
+## Struktur Proyek
 
 ```
 .
 ├── .github/
 │   └── workflows/
-│       └── main.yml        # GitHub Actions workflow configuration
+│       └── main.yml        # Konfigurasi workflow GitHub Actions
 ├── MLproject/
-│   ├── conda.yaml          # Conda environment configuration
-│   ├── MLproject           # MLflow project configuration
-│   ├── modelling.py        # Model training script
-│   └── heart_preprocessing.csv  # Preprocessed dataset
-├── README.md               # This file
-└── dockerhub.txt           # Docker Hub repository URL
+│   ├── conda.yaml          # Konfigurasi lingkungan conda
+│   ├── MLproject           # Konfigurasi proyek MLflow
+│   ├── modelling.py        # Script pelatihan model
+│   └── heart_preprocessing.csv  # Dataset yang sudah diproses
+├── README.md               # File ini
+└── dockerhub.txt           # URL repositori Docker Hub
 ```
 
-## MLflow Project
+## Proyek MLflow
 
-The MLproject file defines the workflow for training the model. It includes:
+File MLproject mendefinisikan alur kerja untuk melatih model. Ini termasuk:
 
-- Environment configuration via conda.yaml
-- Parameters for the Random Forest classifier:
+- Konfigurasi lingkungan melalui conda.yaml
+- Parameter untuk classifier Random Forest:
   - `n_estimators` (default: 400)
   - `max_depth` (default: 10)
   - `dataset` (default: "heart_preprocessing.csv")
 
-## Running the Project
+## Menjalankan Proyek
 
-### Prerequisites
+### Prasyarat
 
 - Python 3.7+
-- Conda or Miniconda
+- Conda atau Miniconda
 - MLflow
 - Git
 
-### Local Execution
+### Eksekusi Lokal
 
-1. Clone this repository:
+1. Clone repositori ini:
    ```
-   git clone <repository-url>
+   git clone <url-repositori>
    cd SMSML_Filza-Rahma-Muflihah/Workflow-CI
    ```
 
-2. Run the MLflow project:
+2. Jalankan proyek MLflow:
    ```
    cd MLproject
    mlflow run . --no-conda
    ```
 
-   Or with custom parameters:
+   Atau dengan parameter kustom:
    ```
    mlflow run . -P n_estimators=500 -P max_depth=8 --no-conda
    ```
 
-## CI/CD with GitHub Actions
+## CI/CD dengan GitHub Actions
 
-This project uses GitHub Actions for continuous integration and deployment. The workflow:
+Proyek ini menggunakan GitHub Actions untuk continuous integration dan deployment. Alur kerja:
 
-1. Triggers on push to the repository
-2. Sets up the Python environment
-3. Installs dependencies
-4. Runs the MLflow project
-5. Builds and pushes a Docker image to Docker Hub
+1. Dipicu saat push ke repositori
+2. Menyiapkan lingkungan Python
+3. Menginstal dependensi
+4. Menjalankan proyek MLflow
+5. Membangun dan mendorong image Docker ke Docker Hub
 
 ## Docker
 
-The model is containerized and available on Docker Hub:
+Model ini dikemas dalam kontainer dan tersedia di Docker Hub:
 [filzarahma/heart_disease](https://hub.docker.com/r/filzarahma/heart_disease)
 
-To pull and run the Docker image:
+Untuk menarik dan menjalankan image Docker:
 
 ```bash
 docker pull filzarahma/heart_disease
 docker run -p 8080:8080 filzarahma/heart_disease
 ```
 
-## License
+## Lisensi
 
-[Specify your license here]
+[Tentukan lisensi Anda di sini]
 
-## Contact
+## Kontak
 
-[Your contact information]
+[Informasi kontak Anda]
