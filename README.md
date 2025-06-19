@@ -67,8 +67,8 @@ File MLproject mendefinisikan alur kerja untuk melatih model. Ini termasuk:
 
 1. Clone repositori ini:
    ```
-   git clone <url-repositori>
-   cd SMSML_Filza-Rahma-Muflihah/Workflow-CI
+   git clone https://github.com/filzarahma/Workflow-CI.git
+   cd Workflow-CI
    ```
 
 2. Jalankan proyek MLflow:
@@ -100,14 +100,5 @@ Model ini dikemas dalam kontainer dan tersedia di Docker Hub:
 Untuk menarik dan menjalankan image Docker:
 
 ```bash
-docker pull filzarahma/heart_disease
-docker run -p 8080:8080 filzarahma/heart_disease
+docker run --name heart-disease-hub -p 5005:8080 filzarahma/heart_disease:latest
 ```
-
-## Lisensi
-
-[Tentukan lisensi Anda di sini]
-
-## Kontak
-
-[Informasi kontak Anda]
